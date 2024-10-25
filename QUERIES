@@ -1,0 +1,61 @@
+---- Joining all tables as Project Requirements
+
+CREATE VIEW forestation AS
+SELECT 
+    f_area.country_code AS fa_country_code,
+    f_area.country_name AS fa_country_name,
+    f_area.year,
+    f_area.forest_area_sqkm,
+    l_area.country_code AS la_country_code,
+    l_area.country_name AS la_country_name,
+    l_area.year AS la_year,
+    l_area.total_area_sq_mi,
+    r.country_code AS r_country_code,
+    r.country_name AS r_country_name,
+    r.region,
+    r.income_group,
+    (f_area.forest_area_sqkm / (l_area.total_area_sq_mi * 2.59)) * 100 AS forest_percentage
+FROM 
+    forest_area AS f_area
+JOIN 
+    land_area AS l_area 
+ON 
+    f_area.year = l_area.year
+    AND f_area.country_code = l_area.country_code
+JOIN 
+    regions AS r
+ON 
+    r.country_code = f_area.country_code;
+
+------------------------------------------------------------------------------
+
+## Global Situation 
+
+---- Finding sum of Forest in Km for the entire World as at 1990
+
+SELECT ROUND(SUM(forest_area_sqkm::numeric), 2) as rounded_sum
+FROM forest_area
+WHERE country_name= 'World' and year = 1990;
+
+
+---- Finding sum of Forest in Km for the entire World at 2016
+
+SELECT ROUND(SUM(forest_area_sqkm::numeric), 2) as rounded_sum
+FROM forest_area
+WHERE country_name= 'World' and year = 2016;
+
+---- The difference in the Forest Square from 1990 to 2016
+
+SELECT 
+    (SELECT ROUND(SUM(forest_area_sqkm::numeric), 2)
+     FROM forest_area
+     WHERE country_name = 'World' AND year = 1990) -
+    (SELECT ROUND(SUM(forest_area_sqkm::numeric), 2)
+     FROM forest_area
+     WHERE country_name = 'World' AND year = 2016) AS forest_area_change
+
+---- Percentage difference in Forest Square in KMs from 1990 to 2016
+
+
+
+------------------------------------------------------------------------------
