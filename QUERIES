@@ -1,6 +1,6 @@
 ---- Joining all tables as Project Requirements
 
-CREATE VIEW forestation AS
+CREATE VIEW deforestation AS
 SELECT 
     f_area.country_code AS fa_country_code,
     f_area.country_name AS fa_country_name,
@@ -44,7 +44,7 @@ SELECT ROUND(SUM(forest_area_sqkm::numeric), 2) as rounded_sum
 FROM forest_area
 WHERE country_name= 'World' and year = 2016;
 
----- The difference in the Forest Square from 1990 to 2016
+---- The difference in the Forest Square from 1990 to 2016 -> using a Scalar Statement
 
 SELECT 
     (SELECT ROUND(SUM(forest_area_sqkm::numeric), 2)
@@ -54,8 +54,25 @@ SELECT
      FROM forest_area
      WHERE country_name = 'World' AND year = 2016) AS forest_area_change
 
----- Percentage difference in Forest Square in KMs from 1990 to 2016
+---- Percentage difference in Forest Square in KMs from 1990 to 2016 -> using Common Table Expression
 
-
+WITH sqkm_1990 AS (
+    SELECT 
+        SUM(forest_area_sqkm) as area_1990
+    FROM 
+        forest_area
+    WHERE country_name = 'World' AND year = 1990
+),
+sqkm_2016 AS (
+    SELECT 
+        SUM(forest_area_sqkm) as area_2016    -- Remove the comma here
+    FROM 
+        forest_area
+    WHERE country_name = 'World' AND year = 2016    -- Remove quotes from year
+)
+SELECT 
+    ((sqkm_1990.area_1990 - sqkm_2016.area_2016)/sqkm_1990.area_1990 * 100) as percentage_difference
+FROM 
+    sqkm_1990, sqkm_2016;
 
 ------------------------------------------------------------------------------
