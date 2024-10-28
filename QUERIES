@@ -81,7 +81,7 @@ LIMIT 1
 ------------------------------------------------------------------------------
 
 
-2. 
+2. Regional Outlook
 ----Creating perfect_forest_2016 view
 
 CREATE OR REPLACE VIEW new_regional_distribution AS
@@ -95,7 +95,7 @@ JOIN land_area l
 ON r.country_code = l.country_code                                    
 JOIN forest_area f
 ON f.country_code = l.country_code AND f.year = l.year
-GROUP BY 1, 2):                                  
+GROUP BY 1, 2);                                 
 
 ---------------------------------------
 ----What was the percent forest of the entire world in 2016?
@@ -159,4 +159,46 @@ WHERE percentage_1990.percent_fa_region > percentage_2016.percent_fa_region
 ORDER BY 2 DESC;
 
 
-3. 
+3. Country-Level Detail
+
+---MAKING  a VIEW table
+
+CREATE OR REPLACE VIEW country_division AS
+(SELECT r.country_name,
+       l.year,
+       SUM(f.forest_area_sqkm) sum_forest_area_sqkm,
+       SUM(l.total_area_sq_mi*2.59) as total_area_sqkm,
+       (SUM(f.forest_area_sqkm)/SUM(l.total_area_sq_mi*2.59))*100 AS percent_fa_region
+FROM regions r 
+JOIN land_area l
+ON r.country_code = l.country_code                                    
+JOIN forest_area f
+ON f.country_code = l.country_code AND f.year = l.year
+GROUP BY 1, 2);
+
+
+---Which 5 countries saw the largest amount decrease in forest area from 1990 to 2016? What was the difference in forest area for each?
+
+WITH forest_area_1990 as
+        (SELECT country_name, forest_area_sqkm AS forest_area_sqkm_1990
+        FROM forest_area
+        WHERE year = 1990 AND forest_area_sqkm IS NOT NULL),
+     forest_area_2016 as
+        (SELECT country_name, forest_area_sqkm AS forest_area_sqkm_2016
+        FROM forest_area
+        WHERE year = 2016 AND forest_area_sqkm IS NOT NULL)
+        
+SELECT forest_area_1990.country_name, 
+       ROUND(CAST(forest_area_sqkm_1990 AS numeric), 2) as    forest_area_sqkm_1990, 
+       ROUND(CAST(forest_area_sqkm_2016 AS numeric), 2) as forest_area_sqkm_2016, 
+       ROUND(CAST(forest_area_sqkm_1990 - forest_area_sqkm_2016 AS numeric), 2) AS forest_area_difference
+FROM forest_area_2016
+JOIN forest_area_1990
+ON forest_area_1990.country_name = forest_area_2016.country_name
+WHERE forest_area_1990  > forest_area_2016 AND forest_area_1990.country_name !='World'
+ORDER BY 4 DESC
+LIMIT 5
+
+
+---Which 5 countries saw the largest percent decrease in forest area from 1990 to 2016? What was the percent change to 2 decimal places for each?
+
