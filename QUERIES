@@ -1,6 +1,6 @@
----- Joining all tables as Project Requirements
+----Joining all tables as Project Requirements
 
-CREATE VIEW deforestation AS
+CREATE VIEW forestation AS
 SELECT 
     f_area.country_code AS fa_country_code,
     f_area.country_name AS fa_country_name,
@@ -31,48 +31,51 @@ ON
 
 ## Global Situation 
 
----- Finding sum of Forest in Km for the entire World as at 1990
+---- a. Finding sum of Forest in Km for the entire World as at 1990
 
-SELECT ROUND(SUM(forest_area_sqkm::numeric), 2) as rounded_sum
-FROM forest_area
-WHERE country_name= 'World' and year = 1990;
+SELECT forest_area_sqkm
+FROM forestation
+WHERE fa_country_name = 'World' and year = 1990;
 
 
----- Finding sum of Forest in Km for the entire World at 2016
+---- b. Finding sum of Forest in Km for the entire World at 2016
 
-SELECT ROUND(SUM(forest_area_sqkm::numeric), 2) as rounded_sum
-FROM forest_area
-WHERE country_name= 'World' and year = 2016;
+SELECT forest_area_sqkm
+FROM forestation
+WHERE fa_country_name = 'World' and year = 2016;
 
----- The difference in the Forest Square from 1990 to 2016 -> using a Scalar Statement
+----c. The difference in the Forest Square from 1990 to 2016 -> using a Scalar Statement
 
-SELECT 
-    (SELECT ROUND(SUM(forest_area_sqkm::numeric), 2)
-     FROM forest_area
-     WHERE country_name = 'World' AND year = 1990) -
-    (SELECT ROUND(SUM(forest_area_sqkm::numeric), 2)
-     FROM forest_area
-     WHERE country_name = 'World' AND year = 2016) AS forest_area_change
+SELECT    
+    (SELECT forest_area_sqkm
+        FROM forestation
+        WHERE fa_country_name = 'World' and year = 1990)-
+    (SELECT forest_area_sqkm
+        FROM forestation
+        WHERE fa_country_name = 'World' and year = 2016) as forest_area_change;
 
----- Percentage difference in Forest Square in KMs from 1990 to 2016 -> using Common Table Expression
+---- d. Percentage difference in Forest Square in KMs from 1990 to 2016 -> using Common Table Expression
 
-WITH sqkm_1990 AS (
-    SELECT 
-        SUM(forest_area_sqkm) as area_1990
-    FROM 
-        forest_area
-    WHERE country_name = 'World' AND year = 1990
-),
-sqkm_2016 AS (
-    SELECT 
-        SUM(forest_area_sqkm) as area_2016    -- Remove the comma here
-    FROM 
-        forest_area
-    WHERE country_name = 'World' AND year = 2016    -- Remove quotes from year
-)
-SELECT 
-    ((sqkm_1990.area_1990 - sqkm_2016.area_2016)/sqkm_1990.area_1990 * 100) as percentage_difference
-FROM 
-    sqkm_1990, sqkm_2016;
+WITH sqkm_1990 as (SELECT forest_area_sqkm as f_a_1990
+                   FROM deforestation
+                   WHERE fa_country_name = 'World' and year = 1990
+                  ),
+     sqkm_2016 as (SELECT forest_area_sqkm as f_a_2016
+                   FROM deforestation
+                   WHERE fa_country_name = 'World' and year = 2016
+                  )             
+---The above CTE aloen could have been used to answer the previous question even 
+SELECT ((f_a_1990 - f_a_2016)/(f_a_1990)*100) as percentage_difference
+FROM sqkm_2016, sqkm_1990;
 
+
+----e. If you compare the amount of forest area lost between 1990 and 2016, to which country's total area in 2016 is it closest to?
+
+SELECT *
+FROM forestation
+WHERE year = 2016 AND total_area_sq_mi <= 511370.27
+ORDER BY total_area_sq_mi DESC
+LIMIT 1
+
+---Knowing well 511370.27 is the Square_mile equvalent of our square kilometer answer gotten in C.
 ------------------------------------------------------------------------------
