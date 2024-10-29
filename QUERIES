@@ -202,3 +202,103 @@ LIMIT 5
 
 ---Which 5 countries saw the largest percent decrease in forest area from 1990 to 2016? What was the percent change to 2 decimal places for each?
 
+WITH forest_area_1990 as
+    (SELECT country_name, forest_area_sqkm AS forest_area_sqkm_1990
+    FROM forest_area
+    WHERE year = 1990 AND forest_area_sqkm IS NOT NULL),
+forest_area_2016 as
+    (SELECT country_name, forest_area_sqkm AS forest_area_sqkm_2016
+    FROM forest_area
+    WHERE year = 2016 AND forest_area_sqkm IS NOT NULL)
+
+SELECT forest_area_1990.country_name, 
+       ROUND(CAST(forest_area_sqkm_1990 AS numeric), 2) as forest_area_sqkm_1990,
+       ROUND(CAST(forest_area_sqkm_2016 AS numeric), 2) as forest_area_sqkm_2016,
+       ROUND(CAST((forest_area_sqkm_1990 - forest_area_sqkm_2016) * 100.0 / forest_area_sqkm_1990 AS numeric), 2) AS percent_decrease
+FROM forest_area_2016
+JOIN forest_area_1990
+ON forest_area_1990.country_name = forest_area_2016.country_name
+WHERE forest_area_sqkm_1990 > forest_area_sqkm_2016 
+    AND forest_area_1990.country_name != 'World'
+ORDER BY 4 DESC
+LIMIT 5
+
+
+---If countries were grouped by percent forestation in quartiles, which group had the most countries in it in 2016?
+
+WITH count AS (
+    SELECT 
+        fa_country_name,
+        year,
+        forest_percentage,
+        CASE 
+            WHEN forest_percentage >= 75 THEN 4
+            WHEN forest_percentage < 75 AND forest_percentage >= 50 THEN 3
+            WHEN forest_percentage < 50 AND forest_percentage >= 25 THEN 2
+            ELSE 1
+        END AS percentile
+    FROM forestation
+    WHERE year = 2016 
+    AND forest_percentage IS NOT NULL
+    AND fa_country_name != 'World'
+)
+SELECT 
+    percentile,
+    COUNT(percentile) as percentile_count
+FROM count
+GROUP BY percentile
+ORDER BY COUNT(percentile) DESC;
+
+
+---List all of the countries that were in the 4th quartile (percent forest > 75%) in 2016.
+
+WITH count AS (
+    SELECT 
+        fa_country_name as Country,
+        year,
+        forest_percentage,
+        CASE 
+            WHEN forest_percentage >= 75 THEN 4
+            WHEN forest_percentage < 75 AND forest_percentage >= 50 THEN 3
+            WHEN forest_percentage < 50 AND forest_percentage >= 25 THEN 2
+            ELSE 1
+        END AS percentile
+    FROM forestation
+    WHERE year = 2016 
+    AND forest_percentage IS NOT NULL
+    AND fa_country_name != 'World'
+)
+SELECT 
+    Country, 
+    percentile,
+    ROUND(CAST(forest_percentage AS numeric), 2) as forest_percentage
+FROM count
+WHERE percentile = 4
+ORDER BY ROUND(CAST(forest_percentage AS numeric), 2) desc;
+
+
+---How many countries had a percent forestation higher than the United States in 2016?
+
+WITH count AS (
+    SELECT 
+        fa_country_name as Country,
+        year,
+        forest_percentage,
+        CASE 
+            WHEN forest_percentage >= 75 THEN 4
+            WHEN forest_percentage < 75 AND forest_percentage >= 50 THEN 3
+            WHEN forest_percentage < 50 AND forest_percentage >= 25 THEN 2
+            ELSE 1
+        END AS percentile
+    FROM forestation
+    WHERE year = 2016 
+    AND forest_percentage IS NOT NULL
+    AND fa_country_name != 'World'
+)
+SELECT 
+    Country, 
+    percentile,
+    ROUND(CAST(forest_percentage AS numeric), 2) as forest_percentage
+FROM count
+WHERE forest_percentage > 33.93
+ORDER BY ROUND(CAST(forest_percentage AS numeric), 2) desc;
