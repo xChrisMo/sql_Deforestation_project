@@ -340,3 +340,17 @@ SELECT
 FROM count
 WHERE forest_percentage > (SELECT forest_percentage FROM count WHERE Country = 'United States') 
 ORDER BY ROUND(CAST(forest_percentage AS numeric), 2) desc;
+
+
+--- Region and Percentage forestation for both 1990 and 2016
+
+WITH percentage_1990 AS 
+    (SELECT * FROM new_regional_distribution WHERE year=1990),
+percentage_2016 AS 
+    (SELECT * FROM new_regional_distribution WHERE year=2016)
+SELECT percentage_2016.region,  
+    ROUND(CAST(percentage_1990.percent_fa_region AS numeric), 2) AS percentage_1990_fa,
+    ROUND(CAST(percentage_2016.percent_fa_region AS numeric), 2) AS percentage_2016_fa
+FROM percentage_2016 
+JOIN percentage_1990 ON percentage_2016.region = percentage_1990.region
+ORDER BY 2 DESC;
