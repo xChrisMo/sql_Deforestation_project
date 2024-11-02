@@ -7,9 +7,9 @@ This project includes data from the [The World Bank](https://www.worldbank.org/e
 
 The files for this project are broken into two major sections.
 1. Queries.sql: Full .sql notebook used for querying
-2. DeforestationExploration.pdf: PDF summary of exploration as required in project brief
+2. Deforestation Exploration.pdf: PDF summary of exploration as required in project brief
 
-The `Deforestation Exploration.pdf` has these major parts
+The Deforestation Exploration.pdf has these major headings to follow:
 
         |-- Global Situation
         |-- Regional Outlook
@@ -17,7 +17,7 @@ The `Deforestation Exploration.pdf` has these major parts
         |-- Recommendations
         |-- Appendix: SQL queries used
 
-## Note
+## Extra
 
 Both the queries.sql and the DeforestationExploration.pdf have the project questions right before the query used to answer them. Reading through the .sql file would give a good foundation to understand the project structure.
 
