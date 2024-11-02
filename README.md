@@ -1,6 +1,6 @@
 ## Project Overview
 
-This project includes data from [World Bank](https://www.worldbank.org/ext/en/home) for data relating from deforestation between the years 1990 to 2016. It is included as part of Udacity's SQL Nanodegree Program. 
+This project includes data from [World Bank](https://www.worldbank.org/ext/en/home) for the World's deforestation between the years 1990 to 2016. The project is included as the first part of Udacity's SQL Nanodegree Program. 
 
 
 ## Project Breakdown
